@@ -1,0 +1,37 @@
+name: 'Execute '
+description: 'Github action to listen to PRs and run searches against the commits to see if interested parties should be notified (e.g. for code review) by either email or slack'
+author: 'Christy Haragan (https://github.com/christyharagan/sourcegraph-search-action)'
+runs:
+  using: 'node12'
+  main: 'out/index.js'
+branding:
+  color: 'green'
+  icon: 'command'
+inputs:
+  sourcegraph_domain_name:
+    description: 'Domain name of your Sourcegraph instance'
+    required: true
+  sourcegraph_api_token:
+    description: 'The API token to access your Sourcegraph GrapghQL API'
+    required: true
+  sourcegraph_org_name:
+    description: 'The name of an organisation setup in Sourcegraph to read saved searches from'
+    required: true
+  slack_token:
+    description: 'The Slack token to issue messages with via the Slack API'
+    required: false
+  smtp_host:
+    description: 'The SMTP host to issue emails from'
+    required: false
+  smtp_port:
+    description: 'The SMTP port to issue emails from'
+    required: false
+  smtp_secure:
+    description: 'Whether the SMTP requests must be secure'
+    required: false
+  smtp_user:
+    description: 'he SMTP user to issue emails from'
+    required: false
+  smtp_password:
+    description: 'The SMTP password to issue emails from'
+    required: false

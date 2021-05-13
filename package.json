@@ -1,0 +1,17 @@
+{
+  "name": "sourcegraph-search-action",
+  "version": "0.1.0",
+  "description": "Github action to listen to PRs and run searches against the commits to see if interested parties should be notified (e.g. for code review) by either email or slack",
+  "main": "out/index.js",
+  "author": "Christy Haragan (https://github.com/christyharagan/sloth-github-action)",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.2.7",
+    "@actions/github": "^4.0.0",
+    "cross-fetch": "^3.1.4",
+    "nodemailer": "^6.6.0"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "^6.4.1"
+  }
+}
