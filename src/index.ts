@@ -81,6 +81,9 @@ async function perform() {
   if (github.context.payload.pull_request) {
     const branch = github.context.payload.pull_request.head.ref
     const repo = github.context.payload.pull_request.head.repo.full_name
+    core.info('Head: ' + JSON.stringify(github.context.payload.pull_request.head))
+    core.info('Repo: ' + repo)
+    core.info('Branch: ' + branch)
     const fetch_call = await fetch(api_url, {
       method: 'post',
       headers: {
@@ -95,6 +98,7 @@ async function perform() {
       return
     }
     const pr_url = github.context.payload.pull_request.html_url
+    core.info('PR URL: ' + pr_url)
 
     const mailer = smtp_host ? nodemailer.createTransport({
       host: smtp_host,
@@ -109,6 +113,7 @@ async function perform() {
     fetch_response.data.savedSearches
       .filter(s => s.namespace.namespaceName == org_name)
       .forEach(async s => {
+        core.info('Query: ' + s.query)
         const email_match = s.description.match(EMAIL_REGEX)
         const slack_match = s.description.match(SLACK_REGEX)
         const email = !email_match ? undefined : email_match[0]
@@ -128,19 +133,15 @@ async function perform() {
           }`
         })
         const search_response = (await searches_call.json()) as RunSearchReponse
+        core.info(JSON.stringify(search_response))
         if (search_response.data.search.results.matchCount > 0) {
           if (email && mailer) {
             send_email(email, pr_url, s.description, mailer)
           }
           if (slack && slack_token) {
+            core.info('Slack: ' + slack)
             send_slack('@' + slack, pr_url, s.description, slack_token)
           }
-        }
-
-        return {
-          query: `${s.query} repo:${repo}$@${branch}`,
-          email,
-          slack
         }
       })
 
