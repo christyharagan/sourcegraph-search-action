@@ -1,5 +1,5 @@
-name: 'Execute '
-description: 'Github action to listen to PRs and run searches against the commits to see if interested parties should be notified (e.g. for code review) by either email or slack'
+name: 'Sourcegraph Search Action'
+description: 'Run searches with Sourcegraph against PRs to see if interested parties should be notified (eg for code review)'
 author: 'Christy Haragan (https://github.com/christyharagan/sourcegraph-search-action)'
 runs:
   using: 'node12'
