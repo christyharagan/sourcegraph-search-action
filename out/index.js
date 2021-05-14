@@ -91,11 +91,12 @@ async function perform() {
             body: JSON.stringify({ query: GET_SEARCHES_QUERY, variables: null })
         });
         let fetch_response;
+        const t = await fetch_call.text();
         try {
-            fetch_response = (await fetch_call.json());
+            fetch_response = JSON.parse(t); //(await fetch_call.json()) as GetSavedSearchesResponse
         }
         catch (e) {
-            core.error(await fetch_call.text());
+            core.error(t);
             return;
         }
         const mailer = smtp_host ? nodemailer_1.default.createTransport({
@@ -132,11 +133,12 @@ async function perform() {
                 })
             });
             let search_response;
+            const t = await searches_call.text();
             try {
-                search_response = (await searches_call.json());
+                search_response = JSON.parse(t); //(await searches_call.json()) as RunSearchReponse
             }
             catch (e) {
-                core.error(await searches_call.text());
+                core.error(t);
                 return;
             }
             core.info(JSON.stringify(search_response));

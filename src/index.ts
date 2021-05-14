@@ -98,10 +98,11 @@ async function perform() {
       body: JSON.stringify({ query: GET_SEARCHES_QUERY, variables: null })
     })
     let fetch_response: GetSavedSearchesResponse
+    const t = await fetch_call.text()
     try {
-      fetch_response = (await fetch_call.json()) as GetSavedSearchesResponse
+      fetch_response = JSON.parse(t) as GetSavedSearchesResponse //(await fetch_call.json()) as GetSavedSearchesResponse
     } catch (e) {
-      core.error(await fetch_call.text())
+      core.error(t)
       return
     }
 
@@ -142,10 +143,11 @@ async function perform() {
           })
         })
         let search_response: RunSearchReponse
+        const t = await searches_call.text()
         try {
-          search_response = (await searches_call.json()) as RunSearchReponse
+          search_response = JSON.parse(t) as RunSearchReponse //(await searches_call.json()) as RunSearchReponse
         } catch (e) {
-          core.error(await searches_call.text())
+          core.error(t)
           return
         }
         core.info(JSON.stringify(search_response))
