@@ -71,6 +71,7 @@ async function perform() {
     const smtp_secure = core.getInput('smtp_secure');
     const smtp_user = core.getInput('smtp_user');
     const smtp_password = core.getInput('smtp_password');
+    core.info('SG: ' + token);
     const api_url = `https://${domain_name}/.api/graphql`;
     if (github.context.payload.pull_request) {
         const branch = github.context.payload.pull_request.head.ref;
