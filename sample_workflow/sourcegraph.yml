@@ -1,0 +1,24 @@
+on: [pull_request]
+jobs:
+  job_1:
+    name: Check PR to see if reviewers should be notified
+    runs-on: ubuntu-latest
+    steps:
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: Install dependencies
+        run: npm install
+      - name: Build and deploy Segment Function
+        uses: christyharagan/sourcegraph-search-action@v1.0.0
+        with:
+          sourcegraph_domain_name: sourcegraph.com # The domain name of your Sourcegraph instance
+          sourcegraph_org_name: acme-corp # Scopes the saved-searches to use. This can be an organisation name, or a username
+          sourcegraph_api_token: ${{ secrets.SG_TOKEN }} # A Sourcegraph API token
+          slack_token: ${{ secrets.SLACK_TOKEN }} # A Slack API token
+          smtp_host: smtp.acme.com # The SMTP host to send emails from
+          smtp_password: ${{ secrets.SMTP_PASSWORD }} # The password to use with the SMTP server
+          smtp_port: 465 # The port of the SMTP server
+          smtp_secure: true # Is the SMTP server a secure connection (true for port 465)
+          smtp_user: christy # The user to send the email from (the SMTP server)
