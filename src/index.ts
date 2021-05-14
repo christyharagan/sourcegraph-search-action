@@ -38,8 +38,16 @@ type RunSearchReponse = {
   }
 }
 
+type RunSearchErrorResponse = {
+  errors: { message: string, locations: { line: number, column: number }[] }[]
+}
+
 function create_message(pr_url: string, desc: string, type?: 'html') {
   return `A PR has been issued that warrants your attention: ${type == 'html' ? `<a href="${pr_url}">${pr_url}</a>` : pr_url}. It matches the Sourcegraph saved search: ${desc}`
+}
+
+function is_error(m: RunSearchReponse | RunSearchErrorResponse): m is RunSearchErrorResponse {
+  return (m as RunSearchErrorResponse).errors !== undefined
 }
 
 async function send_email(addr: string, pr_url: string, desc: string, mailer: Transporter) {
@@ -67,18 +75,14 @@ async function send_slack(slack_channel: string, pr_url: string, desc: string, s
 
 async function perform() {
   const domain_name = core.getInput('sourcegraph_domain_name')
-  const token = process.env.SGTOKEN
-  const slack_token = process.env.SLACKTOKEN
-  // const token = core.getInput('sourcegraph_api_token')
+  const token = core.getInput('sourcegraph_api_token')
   const org_name = core.getInput('sourcegraph_org_name')
-  // const slack_token = core.getInput('slack_token')
+  const slack_token = core.getInput('slack_token')
   const smtp_host = core.getInput('smtp_host')
   const smtp_port = core.getInput('smtp_port')
   const smtp_secure = core.getInput('smtp_secure')
   const smtp_user = core.getInput('smtp_user')
   const smtp_password = core.getInput('smtp_password')
-
-  core.info('SG: '+token)
 
   const api_url = `https://${domain_name}/.api/graphql`
 
@@ -146,26 +150,29 @@ async function perform() {
             variables: null
           })
         })
-        let search_response: RunSearchReponse
+        let search_response: RunSearchReponse | RunSearchErrorResponse
         const t = await searches_call.text()
         try {
-          search_response = JSON.parse(t) as RunSearchReponse //(await searches_call.json()) as RunSearchReponse
+          search_response = JSON.parse(t) as RunSearchReponse | RunSearchErrorResponse //(await searches_call.json()) as RunSearchReponse
         } catch (e) {
           core.error(t)
           return
         }
-        core.info(JSON.stringify(search_response))
-        if (search_response.data.search.results.matchCount > 0) {
-          if (email && mailer) {
-            send_email(email, pr_url, s.description, mailer)
-          }
-          if (slack && slack_token) {
-            core.info('Slack: ' + slack)
-            send_slack('@' + slack, pr_url, s.description, slack_token)
+        if (is_error(search_response)) {
+          core.error('Error executing: ' + s.description)
+          core.error(JSON.stringify(search_response))
+        } else {
+          if (search_response.data.search.results.matchCount > 0) {
+            if (email && mailer) {
+              send_email(email, pr_url, s.description, mailer)
+            }
+            if (slack && slack_token) {
+              core.info('Slack: ' + slack)
+              send_slack('@' + slack, pr_url, s.description, slack_token)
+            }
           }
         }
       })
-
   }
 }
 

@@ -40,6 +40,9 @@ const GET_SEARCHES_QUERY = `query {
 function create_message(pr_url, desc, type) {
     return `A PR has been issued that warrants your attention: ${type == 'html' ? `<a href="${pr_url}">${pr_url}</a>` : pr_url}. It matches the Sourcegraph saved search: ${desc}`;
 }
+function is_error(m) {
+    return m.errors !== undefined;
+}
 async function send_email(addr, pr_url, desc, mailer) {
     await mailer.sendMail({
         from: 'no_reply@sourcegraph.com',
@@ -71,7 +74,6 @@ async function perform() {
     const smtp_secure = core.getInput('smtp_secure');
     const smtp_user = core.getInput('smtp_user');
     const smtp_password = core.getInput('smtp_password');
-    core.info('SG: ' + token);
     const api_url = `https://${domain_name}/.api/graphql`;
     if (github.context.payload.pull_request) {
         const branch = github.context.payload.pull_request.head.ref;
@@ -142,14 +144,19 @@ async function perform() {
                 core.error(t);
                 return;
             }
-            core.info(JSON.stringify(search_response));
-            if (search_response.data.search.results.matchCount > 0) {
-                if (email && mailer) {
-                    send_email(email, pr_url, s.description, mailer);
-                }
-                if (slack && slack_token) {
-                    core.info('Slack: ' + slack);
-                    send_slack('@' + slack, pr_url, s.description, slack_token);
+            if (is_error(search_response)) {
+                core.error('Error executing: ' + s.description);
+                core.error(JSON.stringify(search_response));
+            }
+            else {
+                if (search_response.data.search.results.matchCount > 0) {
+                    if (email && mailer) {
+                        send_email(email, pr_url, s.description, mailer);
+                    }
+                    if (slack && slack_token) {
+                        core.info('Slack: ' + slack);
+                        send_slack('@' + slack, pr_url, s.description, slack_token);
+                    }
                 }
             }
         });
