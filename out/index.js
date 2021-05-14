@@ -75,7 +75,12 @@ async function perform() {
     if (github.context.payload.pull_request) {
         const branch = github.context.payload.pull_request.head.ref;
         const repo = github.context.payload.pull_request.head.repo.full_name;
-        core.info('Head: ' + JSON.stringify(github.context.payload.pull_request.head));
+        if (!github.context.payload.pull_request.html_url) {
+            core.error('No URL for PR');
+            return;
+        }
+        const pr_url = github.context.payload.pull_request.html_url;
+        core.info('PR URL: ' + pr_url);
         core.info('Repo: ' + repo);
         core.info('Branch: ' + branch);
         const fetch_call = await cross_fetch_1.default(api_url, {
@@ -83,15 +88,9 @@ async function perform() {
             headers: {
                 Authorization: `token ${token}`
             },
-            body: GET_SEARCHES_QUERY
+            body: JSON.stringify({ query: GET_SEARCHES_QUERY, variables: null })
         });
         const fetch_response = (await fetch_call.json());
-        if (!github.context.payload.pull_request.html_url) {
-            core.error('No URL for PR');
-            return;
-        }
-        const pr_url = github.context.payload.pull_request.html_url;
-        core.info('PR URL: ' + pr_url);
         const mailer = smtp_host ? nodemailer_1.default.createTransport({
             host: smtp_host,
             port: parseInt(smtp_port),
@@ -114,13 +113,16 @@ async function perform() {
                 headers: {
                     Authorization: `token ${token}`
                 },
-                body: `query {
-            search(query: "${s.query} repo:${repo}$@${branch} type:diff") {
-              results {
-                matchCount
-              }
-            }
-          }`
+                body: JSON.stringify({
+                    query: `query {
+  search(query: "${s.query} repo:${repo}$@${branch} type:diff") {
+    results {
+      matchCount
+    }
+  }
+}`,
+                    variables: null
+                })
             });
             const search_response = (await searches_call.json());
             core.info(JSON.stringify(search_response));
