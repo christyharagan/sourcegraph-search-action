@@ -132,7 +132,7 @@ async function perform() {
                 },
                 body: JSON.stringify({
                     query: `query {
-  search(query: "${s.query} repo:${repo}$@${branch} type:diff") {
+  search(query: "${s.query} repo:${repo}@${branch} type:diff") {
     results {
       matchCount
     }
