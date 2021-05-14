@@ -67,9 +67,11 @@ async function send_slack(slack_channel: string, pr_url: string, desc: string, s
 
 async function perform() {
   const domain_name = core.getInput('sourcegraph_domain_name')
-  const token = core.getInput('sourcegraph_api_token')
+  const token = process.env.SGTOKEN
+  const slack_token = process.env.SLACKTOKEN
+  // const token = core.getInput('sourcegraph_api_token')
   const org_name = core.getInput('sourcegraph_org_name')
-  const slack_token = core.getInput('slack_token')
+  // const slack_token = core.getInput('slack_token')
   const smtp_host = core.getInput('smtp_host')
   const smtp_port = core.getInput('smtp_port')
   const smtp_secure = core.getInput('smtp_secure')
