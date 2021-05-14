@@ -61,7 +61,7 @@ async function send_email(addr: string, pr_url: string, desc: string, mailer: Tr
 }
 
 async function send_slack(slack_channel: string, pr_url: string, desc: string, slack_token: string) {
-  await fetch(`https://slack.com/api/chat.postMessage`, {
+  const r = await fetch(`https://slack.com/api/chat.postMessage`, {
     method: 'post',
     headers: {
       'authorization': `Bearer ${slack_token}`
@@ -71,6 +71,9 @@ async function send_slack(slack_channel: string, pr_url: string, desc: string, s
       text: create_message(pr_url, desc)
     })
   })
+  const t = await r.text()
+  core.info('Sent Slack:')
+  core.info(t)
 }
 
 async function perform() {
@@ -83,6 +86,8 @@ async function perform() {
   const smtp_secure = core.getInput('smtp_secure')
   const smtp_user = core.getInput('smtp_user')
   const smtp_password = core.getInput('smtp_password')
+
+  core.info(slack_token)
 
   const api_url = `https://${domain_name}/.api/graphql`
 
@@ -133,6 +138,9 @@ async function perform() {
         const slack_match = s.description.match(SLACK_REGEX)
         const email = !email_match ? undefined : email_match[0]
         const slack = !slack_match ? undefined : slack_match[0]
+
+        core.info('Email: ' + email)
+        core.info('Slack: ' + slack)
 
         const searches_call = await fetch(api_url, {
           method: 'post',

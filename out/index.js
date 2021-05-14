@@ -53,7 +53,7 @@ async function send_email(addr, pr_url, desc, mailer) {
     });
 }
 async function send_slack(slack_channel, pr_url, desc, slack_token) {
-    await cross_fetch_1.default(`https://slack.com/api/chat.postMessage`, {
+    const r = await cross_fetch_1.default(`https://slack.com/api/chat.postMessage`, {
         method: 'post',
         headers: {
             'authorization': `Bearer ${slack_token}`
@@ -63,6 +63,9 @@ async function send_slack(slack_channel, pr_url, desc, slack_token) {
             text: create_message(pr_url, desc)
         })
     });
+    const t = await r.text();
+    core.info('Sent Slack:');
+    core.info(t);
 }
 async function perform() {
     const domain_name = core.getInput('sourcegraph_domain_name');
@@ -74,6 +77,7 @@ async function perform() {
     const smtp_secure = core.getInput('smtp_secure');
     const smtp_user = core.getInput('smtp_user');
     const smtp_password = core.getInput('smtp_password');
+    core.info(slack_token);
     const api_url = `https://${domain_name}/.api/graphql`;
     if (github.context.payload.pull_request) {
         const branch = github.context.payload.pull_request.head.ref;
@@ -119,6 +123,8 @@ async function perform() {
             const slack_match = s.description.match(SLACK_REGEX);
             const email = !email_match ? undefined : email_match[0];
             const slack = !slack_match ? undefined : slack_match[0];
+            core.info('Email: ' + email);
+            core.info('Slack: ' + slack);
             const searches_call = await cross_fetch_1.default(api_url, {
                 method: 'post',
                 headers: {
