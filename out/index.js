@@ -155,13 +155,13 @@ async function perform() {
                 core.error(JSON.stringify(search_response));
             }
             else {
+                core.info(JSON.stringify(search_response));
                 if (search_response.data.search.results.matchCount > 0) {
                     if (email && mailer) {
                         send_email(email, pr_url, s.description, mailer);
                     }
                     if (slack && slack_token) {
-                        core.info('Slack: ' + slack);
-                        send_slack('@' + slack, pr_url, s.description, slack_token);
+                        send_slack(slack, pr_url, s.description, slack_token);
                     }
                 }
             }
