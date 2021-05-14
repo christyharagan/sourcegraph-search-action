@@ -90,7 +90,14 @@ async function perform() {
             },
             body: JSON.stringify({ query: GET_SEARCHES_QUERY, variables: null })
         });
-        const fetch_response = (await fetch_call.json());
+        let fetch_response;
+        try {
+            fetch_response = (await fetch_call.json());
+        }
+        catch (e) {
+            core.error(await fetch_call.text());
+            return;
+        }
         const mailer = smtp_host ? nodemailer_1.default.createTransport({
             host: smtp_host,
             port: parseInt(smtp_port),
@@ -124,7 +131,14 @@ async function perform() {
                     variables: null
                 })
             });
-            const search_response = (await searches_call.json());
+            let search_response;
+            try {
+                search_response = (await searches_call.json());
+            }
+            catch (e) {
+                core.error(await searches_call.text());
+                return;
+            }
             core.info(JSON.stringify(search_response));
             if (search_response.data.search.results.matchCount > 0) {
                 if (email && mailer) {

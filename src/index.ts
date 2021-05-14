@@ -97,7 +97,13 @@ async function perform() {
       },
       body: JSON.stringify({ query: GET_SEARCHES_QUERY, variables: null })
     })
-    const fetch_response = (await fetch_call.json()) as GetSavedSearchesResponse
+    let fetch_response: GetSavedSearchesResponse
+    try {
+      fetch_response = (await fetch_call.json()) as GetSavedSearchesResponse
+    } catch (e) {
+      core.error(await fetch_call.text())
+      return
+    }
 
 
     const mailer = smtp_host ? nodemailer.createTransport({
@@ -135,7 +141,13 @@ async function perform() {
             variables: null
           })
         })
-        const search_response = (await searches_call.json()) as RunSearchReponse
+        let search_response: RunSearchReponse
+        try {
+          search_response = (await searches_call.json()) as RunSearchReponse
+        } catch (e) {
+          core.error(await searches_call.text())
+          return
+        }
         core.info(JSON.stringify(search_response))
         if (search_response.data.search.results.matchCount > 0) {
           if (email && mailer) {

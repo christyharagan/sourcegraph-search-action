@@ -1,6 +1,6 @@
 {
   "name": "sourcegraph-search-action",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Github action to listen to PRs and run searches against the commits to see if interested parties should be notified (e.g. for code review) by either email or slack",
   "main": "out/index.js",
   "author": "Christy Haragan (https://github.com/christyharagan/sloth-github-action)",
